@@ -1,21 +1,29 @@
 import { prisma } from "@/lib/db";
+import { productError, validateProduct } from "@/lib/products";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const products = await prisma.product.findMany();
-
-  return NextResponse.json(products);
+  try {
+    const products = await prisma.product.findMany({ orderBy: { id: "desc" } });
+    return NextResponse.json(products);
+  } catch (error) {
+    return productError(error);
+  }
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
-
-  const product = await prisma.product.create({
-    data: {
-      name: body.name,
-      price: body.price,
-    },
-  });
-
-  return NextResponse.json(product);
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+  }
+  const result = validateProduct(body);
+  if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+  try {
+    const product = await prisma.product.create({ data: result.data });
+    return NextResponse.json(product, { status: 201 });
+  } catch (error) {
+    return productError(error);
+  }
 }
