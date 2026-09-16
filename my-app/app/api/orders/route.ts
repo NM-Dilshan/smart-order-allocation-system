@@ -1,5 +1,4 @@
-import { withManagement } from "@/lib/auth";
-import { getAssessmentCustomer } from "@/lib/assessment-customer";
+import { withCustomer, withManagement, type CurrentUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { allocateOrder } from "@/lib/allocation";
@@ -12,7 +11,7 @@ async function GETHandler() {
   } catch (error) { return orderError(error); }
 }
 
-export async function POST(req: Request) {
+async function POSTHandler(customer: CurrentUser, req: Request) {
   let body: unknown;
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
@@ -30,7 +29,6 @@ export async function POST(req: Request) {
 
       await deductOrderStock(tx, allocation.branchId, items);
 
-      const customer = await getAssessmentCustomer(tx);
       const created = await tx.order.create({
         data: { customerLatitude, customerLongitude, userId: customer.id, branchId: allocation.branchId, status: "ALLOCATED", items: { create: items } },
         include: orderInclude,
@@ -44,3 +42,5 @@ export async function POST(req: Request) {
 }
 
 export const GET = withManagement(GETHandler);
+
+export const POST = withCustomer(POSTHandler);

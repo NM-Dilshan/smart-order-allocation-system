@@ -29,9 +29,9 @@ test("A/B: availability uses one branch for all items, never combined totals", a
   const check = (items) => route.POST({ json: async () => ({ customerLatitude: 0, customerLongitude: 0, items }) });
   const unavailable = (await check([{ productId: 1, quantity: 25 }])).body;
   assert.equal(unavailable.available, false);
-  assert.equal(unavailable.maximumStock[0].maximumQuantity, 20);
-  assert.equal(unavailable.maximumStock[0].requestedQuantity, 25);
-  assert.equal((await check([{ productId: 99, quantity: 1 }])).body.maximumStock[0].maximumQuantity, 0);
+  assert.equal(unavailable.maximumStock, undefined);
+  assert.equal(unavailable.bestAvailableBranch, undefined);
+  assert.equal((await check([{ productId: 99, quantity: 1 }])).body.available, false);
   inventories = [{ 1: 20, 2: 2 }, { 1: 10, 2: 8 }];
   assert.equal((await check([{ productId: 1, quantity: 10 }, { productId: 2, quantity: 5 }])).body.available, true);
   inventories = [{ 1: 20, 2: 2 }, { 1: 2, 2: 8 }];
@@ -73,7 +73,7 @@ function database(initial) {
 function route(db) {
   return load("../app/api/orders/route.ts", {
     "next/server": response, "@/lib/db": { prisma: db }, "@/lib/orders": orders, "@/lib/order-stock": stock,
-    "@/lib/auth": { withManagement: (handler) => handler },
+    "@/lib/auth": { withManagement: (handler) => handler, withCustomer: (handler) => (...args) => handler({ id: 15, role: "CUSTOMER" }, ...args) },
     "@/lib/assessment-customer": { getAssessmentCustomer: (tx) => tx.user.upsert({}) },
     // Force a previously eligible selection to exercise stock changes after allocation.
     "@/lib/allocation": { allocateOrder: async () => ({ branchId: 1, branchName: "Selected" }) },

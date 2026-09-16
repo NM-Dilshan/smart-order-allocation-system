@@ -1,0 +1,15 @@
+HELD-OUT TEST PERFORMANCE
+                            precision    recall  f1-score   support
+
+       Account/Login Issue     0.9000    1.0000    0.9474         9
+            Delivery Issue     1.0000    0.6667    0.8000         9
+           General Inquiry     1.0000    0.4286    0.6000         7
+      Order Status Inquiry     0.6154    0.8889    0.7273         9
+             Payment Issue     0.9000    1.0000    0.9474         9
+     Product/Stock Inquiry     0.7500    1.0000    0.8571         9
+Promotion/Discount Inquiry     0.8182    0.9000    0.8571        10
+       Refund/Cancellation     1.0000    0.6667    0.8000         9
+
+                  accuracy                         0.8310        71
+                 macro avg     0.8729    0.8188    0.8170        71
+              weighted avg     0.8686    0.8310    0.8237        71

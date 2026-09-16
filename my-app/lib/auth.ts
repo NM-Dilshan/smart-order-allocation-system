@@ -11,6 +11,12 @@ export function isManagementUser(user: { email: string; role: string }) {
   return !user.email.toLowerCase().endsWith("@smart-order.invalid") && ["ADMIN", "STAFF"].includes(user.role);
 }
 
+export function isCustomerUser(user: { email: string; role: string }) {
+  return user.role === "CUSTOMER" && !user.email.toLowerCase().endsWith("@smart-order.invalid");
+}
+
+export type CurrentUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
+
 export function credentialVersion(passwordHash: string) {
   return createHmac("sha256", process.env.AUTH_SECRET!).update(passwordHash).digest("hex");
 }
@@ -47,6 +53,19 @@ export function withManagement<T extends unknown[]>(handler: (...args: T) => Pro
       const request = args[0];
       if (request instanceof Request && !["GET", "HEAD"].includes(request.method) && !validOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
       return await handler(...args);
+    } catch { return NextResponse.json({ error: "Unable to complete the request." }, { status: 500 }); }
+  };
+}
+
+export function withCustomer<T extends unknown[]>(handler: (user: CurrentUser, ...args: T) => Promise<Response>) {
+  return async (...args: T): Promise<Response> => {
+    try {
+      const user = await getCurrentUser();
+      if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+      if (!isCustomerUser(user)) return NextResponse.json({ error: "Customer access required." }, { status: 403 });
+      const request = args[0];
+      if (request instanceof Request && !["GET", "HEAD"].includes(request.method) && !validOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+      return await handler(user, ...args);
     } catch { return NextResponse.json({ error: "Unable to complete the request." }, { status: 500 }); }
   };
 }

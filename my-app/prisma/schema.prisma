@@ -19,6 +19,8 @@ model User {
   email     String   @unique
   password  String
   role      UserRole @default(CUSTOMER)
+  inquiries CustomerInquiry[] @relation("InquiryCustomer")
+  inquiryReplies CustomerInquiry[] @relation("InquiryResponder")
   orders    Order[]
   createdAt DateTime @default(now())
 }
@@ -88,4 +90,26 @@ enum OrderStatus {
   ALLOCATED
   CANCELLED
   COMPLETED
+}
+
+model CustomerInquiry {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  message           String
+  predictedCategory String
+  confidence        Float
+  createdAt         DateTime @default(now())
+  status            InquiryStatus @default(OPEN)
+  adminReply        String?
+  repliedAt         DateTime?
+  repliedById       Int?
+  user              User     @relation("InquiryCustomer", fields: [userId], references: [id])
+  repliedBy         User?    @relation("InquiryResponder", fields: [repliedById], references: [id], onDelete: SetNull)
+
+  @@index([userId, id])
+}
+
+enum InquiryStatus {
+  OPEN
+  RESOLVED
 }

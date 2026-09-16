@@ -15,16 +15,6 @@ export async function POST(req: Request) {
     if (products.length !== result.data.items.length) return NextResponse.json({ error: "One or more products do not exist." }, { status: 400 });
     const bestAvailableBranch = await allocateOrder(prisma, result.data.items, result.data.customerLatitude, result.data.customerLongitude);
     if (bestAvailableBranch) return NextResponse.json({ available: true, bestAvailableBranch });
-    const stock = await prisma.branchInventory.groupBy({
-      by: ["productId"],
-      where: { productId: { in: result.data.items.map((item) => item.productId) } },
-      _max: { quantity: true },
-    });
-    const maximumStock = result.data.items.map((item) => ({
-      productId: item.productId,
-      requestedQuantity: item.quantity,
-      maximumQuantity: stock.find((row) => row.productId === item.productId)?._max.quantity ?? 0,
-    }));
-    return NextResponse.json({ available: false, message: "No single branch currently has enough stock to fulfill this order.", maximumStock });
+    return NextResponse.json({ available: false, message: "No single branch currently has enough stock to fulfill this order." });
   } catch (error) { return orderError(error); }
 }

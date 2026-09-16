@@ -8,7 +8,7 @@ import { api, input, message, primary, secondary, type AllocatedOrder, type Prod
 import type { Allocation } from "@/lib/allocation";
 
 type Row = { key: number; productId: string; quantity: string };
-type Availability = { available: boolean; bestAvailableBranch?: Allocation; message?: string; maximumStock?: { productId: number; requestedQuantity: number; maximumQuantity: number }[] };
+type Availability = { available: boolean; bestAvailableBranch?: Allocation; message?: string };
 
 export default function OrderForm({ onClose, onComplete }: { onClose: () => void; onComplete: (order: AllocatedOrder) => void }) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -144,13 +144,7 @@ export default function OrderForm({ onClose, onComplete }: { onClose: () => void
               <p className="flex items-center gap-2"><CheckCircle2 size={16} aria-hidden="true" />Can fulfill all requested items</p>
               <p>Preview only. Stock and workload are checked again when you place your order; the allocated branch may change.</p>
             </div>}
-            {!available && !!availability.maximumStock?.length && <>
-              <p className="mt-3 font-semibold">Maximum stock at a single branch</p>
-              <ul className="mt-2 space-y-2">{availability.maximumStock.map((item) => <li key={item.productId} className="break-words [overflow-wrap:anywhere]">
-                <span className="font-medium">{products.find((product) => product.id === item.productId)?.name ?? `Product #${item.productId}`}</span>: {item.maximumQuantity} available (requested {item.requestedQuantity})
-              </li>)}</ul>
-              {availability.maximumStock.length > 1 && <p className="mt-3">These maximums may be at different branches. One branch must have enough stock for all items.</p>}
-            </>}
+
           </div>}
         </div>
         <div className="flex flex-wrap justify-end gap-3 border-t border-zinc-200 bg-zinc-50 px-6 py-4"><button type="button" className={secondary} onClick={onClose} disabled={busy}>Cancel</button><button type="submit" className={primary} disabled={busy || locating || loading || !!catalogError || !products.length}>{busy ? <LoaderCircle size={16} className="motion-safe:animate-spin" aria-hidden="true" /> : <CheckCircle2 size={16} aria-hidden="true" />}{busy ? available ? "Placing order..." : "Checking availability..." : available ? "Place Order" : "Check Availability"}</button></div>

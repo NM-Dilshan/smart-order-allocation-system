@@ -71,7 +71,7 @@ test("E/integration: 409 has no writes; successful allocation deducts selected i
     tx.product = { findMany: async () => [{ id: 1 }] };
     tx.user = { upsert: async () => { writes++; return { id: 7 }; } };
     tx.order.create = async ({ data }) => {
-      writes++; assert.equal(data.status, "ALLOCATED"); assert.equal(data.branchId, 1);
+      writes++; assert.equal(data.userId, 15); assert.equal(data.status, "ALLOCATED"); assert.equal(data.branchId, 1);
       return { id: 3, ...data };
     };
     tx.branchInventory = { updateMany: async ({ where, data }) => {
@@ -84,7 +84,7 @@ test("E/integration: 409 has no writes; successful allocation deducts selected i
   const route = load("../app/api/orders/route.ts", {
     "next/server": { NextResponse: { json: (body, init) => ({ body, status: init?.status ?? 200 }) } },
     "@/lib/db": { prisma: db }, "@/lib/allocation": allocation,
-    "@/lib/auth": { withManagement: (handler) => handler },
+    "@/lib/auth": { withManagement: (handler) => handler, withCustomer: (handler) => (...args) => handler({ id: 15, role: "CUSTOMER" }, ...args) },
     "@/lib/assessment-customer": { getAssessmentCustomer: (tx) => tx.user.upsert({}) },
     "@/lib/order-stock": stock,
     "@/lib/orders": { validateOrder, orderInclude, orderError: (error) => { throw error; } },
@@ -94,7 +94,7 @@ test("E/integration: 409 has no writes; successful allocation deducts selected i
   assert.equal(failed.status, 409); assert.equal(writes, 0);
   eligible = true;
   const success = await route.POST(request);
-  assert.equal(success.status, 201); assert.equal(writes, 2);
+  assert.equal(success.status, 201); assert.equal(writes, 1);
   assert.equal(success.body.id, 3); assert.equal(success.body.allocation.branchId, 1);
 });
 
@@ -129,7 +129,7 @@ test("availability selects the full score winner, excludes insufficient nearest 
   });
   const final = load("../app/api/orders/route.ts", {
     "next/server": response, "@/lib/db": { prisma: db }, "@/lib/orders": orders, "@/lib/allocation": allocation,
-    "@/lib/order-stock": stock, "@/lib/auth": { withManagement: (handler) => handler },
+    "@/lib/order-stock": stock, "@/lib/auth": { withManagement: (handler) => handler, withCustomer: (handler) => (...args) => handler({ id: 15, role: "CUSTOMER" }, ...args) },
     "@/lib/assessment-customer": { getAssessmentCustomer: async () => ({ id: 1 }) },
   });
   const placed = await final.POST({ json: async () => ({ ...body, branchId: 1 }) });

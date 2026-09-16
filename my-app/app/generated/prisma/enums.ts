@@ -26,3 +26,11 @@ export const OrderStatus = {
 } as const
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
+
+export const InquiryStatus = {
+  OPEN: 'OPEN',
+  RESOLVED: 'RESOLVED'
+} as const
+
+export type InquiryStatus = (typeof InquiryStatus)[keyof typeof InquiryStatus]

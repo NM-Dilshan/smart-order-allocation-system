@@ -56,7 +56,8 @@ export const ModelName = {
   Product: 'Product',
   BranchInventory: 'BranchInventory',
   Order: 'Order',
-  OrderItem: 'OrderItem'
+  OrderItem: 'OrderItem',
+  CustomerInquiry: 'CustomerInquiry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -139,6 +140,22 @@ export const OrderItemScalarFieldEnum = {
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+export const CustomerInquiryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  message: 'message',
+  predictedCategory: 'predictedCategory',
+  confidence: 'confidence',
+  createdAt: 'createdAt',
+  status: 'status',
+  adminReply: 'adminReply',
+  repliedAt: 'repliedAt',
+  repliedById: 'repliedById'
+} as const
+
+export type CustomerInquiryScalarFieldEnum = (typeof CustomerInquiryScalarFieldEnum)[keyof typeof CustomerInquiryScalarFieldEnum]
 
 
 export const SortOrder = {

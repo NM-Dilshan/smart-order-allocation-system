@@ -4,6 +4,6 @@ import AuthControls from "./auth-controls";
 
 export default async function ManagementAccess({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-  if (!user?.management) redirect("/login");
-  return <><AuthControls name={user.name} />{children}</>;
+  if (!user?.management) redirect("/admin/login");
+  return <><AuthControls name={user.name} management />{children}</>;
 }

@@ -1,7 +1,8 @@
 # Authentication
 
 User.role defaults to CUSTOMER. ADMIN and STAFF have the same management access.
-No public registration or role-assignment endpoint is provided.
+Public registration creates CUSTOMER accounts only. No public role-assignment endpoint is provided.
+See [CUSTOMER_AUTHENTICATION.md](CUSTOMER_AUTHENTICATION.md) for customer flows, authorization, verification, and the current file manifest.
 
 ## Local setup
 
@@ -34,14 +35,21 @@ No environment variables are exposed through NEXT_PUBLIC names.
 - /branches, /products and /inventory require ADMIN or STAFF on the server.
 - Branch and inventory APIs require management access for all methods.
 - Product write APIs require management access; product GETs remain public.
-- Order list/detail GETs and cancellation POST require management access.
-- /orders, POST /api/orders, and availability checks remain public for the
-  assessment. Guests see only the result of their own submission, not the list.
+- Administrative order list/detail GETs and cancellation POST require management access.
+- /orders is a role-aware landing page. POST /api/orders requires CUSTOMER authentication.
+- /my-orders and /api/my-orders (including detail reads) require CUSTOMER authentication
+  and constrain database queries to the authenticated user.
+- Product reads and availability checks remain public; exact inventory counts are not returned.
+- /login is the customer entry point; /admin/login accepts ADMIN/STAFF only.
+- /register and POST /api/auth/register create CUSTOMER accounts with scrypt passwords.
+- `/support` and inquiry submission/history require CUSTOMER access. Inquiry ownership comes from the session.
+- `/admin/inquiries` and `GET /api/inquiries` require ADMIN/STAFF. See [AI integration](ai/INTEGRATION.md).
 - Authenticated writes require an Origin header exactly matching AUTH_ORIGIN.
 
-Guest orders use lib/assessment-customer.ts and the dedicated CUSTOMER record.
-Its password is a hash of a random undisclosed value; reserved assessment email
-addresses cannot sign in. Its historical placeholder is upgraded on next order.
+Normal guest placement is retired in favor of authenticated customer ordering.
+lib/assessment-customer.ts remains an unused historical helper; no active route calls it.
+Existing assessment orders are retained for management and never reassigned to new accounts.
+Reserved assessment email addresses cannot register or sign in.
 Management credentials never change allocation, deduction or cancellation logic.
 
 ## Sessions and limits
@@ -54,7 +62,8 @@ Logout deletes the browser cookie. Stateless sessions cannot individually revoke
 a copied cookie; rotate AUTH_SECRET or change the user's password to revoke it.
 Login throttling allows five attempts per email per 15 minutes per server process;
 a multi-instance deployment needs a shared rate limiter at the application edge.
-Public guest ordering is intentional and needs abuse controls before public use.
+Registration uses the same limiter with a separate registration key per email.
+Production abuse controls should also cover public registration and availability checks.
 
 Historical development orders created before Step 7 did not deduct inventory.
 Clean/reset those test orders before final testing; cancelling them can restore
@@ -62,17 +71,17 @@ stock never deducted. No automatic destructive cleanup is performed.
 
 ## Manual checks
 
-1. Visit management pages logged out: redirected to /login.
+1. Visit management pages logged out: redirected to /admin/login.
 2. POST to a protected API logged out: 401.
 3. Try invalid credentials: generic Invalid email or password message.
 4. Sign in with the provisioned account, then exercise management operations.
 5. Confirm a CUSTOMER or a removed management role cannot access management APIs.
 6. Send a protected mutation with a foreign Origin: 403.
 7. Logout, then retry protected pages and APIs: blocked.
-8. Place a guest order, check deducted stock, then sign in and cancel once.
+8. Register and sign in as a customer, place an order, and check My Orders. Then sign in as management and cancel once.
 9. Retry cancellation: 409 and no second restoration.
 
-## Step 9 file manifest
+## Historical Step 9 file manifest
 
 Created (paths relative to my-app):
 
@@ -131,7 +140,7 @@ app/generated/prisma/internal/prismaNamespaceBrowser.ts
 app/generated/prisma/models/User.ts
 ```
 
-Verification: 20 tests pass across auth/allocation/stock/cancellation, TypeScript
+Historical Step 9 verification (superseded by CUSTOMER_AUTHENTICATION.md): 20 tests pass across auth/allocation/stock/cancellation, TypeScript
 and targeted ESLint pass. Auth tests use real iron-session encryption and scrypt
 with a mocked database/cookie store. Existing business tests simulate database
 transactions, not real concurrent PostgreSQL sessions. Live logged-out page/API
