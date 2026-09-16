@@ -15,6 +15,7 @@ function harness(file, user = null) {
     },
     "react/jsx-runtime": { jsx, jsxs: jsx }, "lucide-react": { Menu: "Menu", X: "X", LogOut: "LogOut" },
     "next/link": { default: "Link" }, "./auth-controls": { default: "AuthControls" },
+    "./cart/cart-provider": { useCustomerCart: () => ({ count: 2 }) },
     "next/navigation": { usePathname: () => pathname, useRouter: () => ({ replace: (path) => redirects.push(path), refresh() { refreshed = true; } }) },
   };
   const exports = {};
@@ -27,7 +28,7 @@ function nodes(node) { return !node || typeof node !== "object" ? [] : [node, ..
 const user = (role) => ({ name: "Test User", email: "test@example.test", role, management: role === "ADMIN" || role === "STAFF", customer: role === "CUSTOMER" });
 
 test("guest, customer, admin and staff receive only their appropriate navigation", () => {
-  for (const [role, expected] of [[null, ["Customer Login", "Register"]], ["CUSTOMER", ["Place Order", "My Orders", "Support"]], ["ADMIN", ["Branches", "Products", "Inventory", "Orders", "Inquiries"]], ["STAFF", ["Branches", "Products", "Inventory", "Orders", "Inquiries"]]]) {
+  for (const [role, expected] of [[null, ["Customer Login", "Register"]], ["CUSTOMER", ["Shop", "Cart (2)", "My Orders", "Support"]], ["ADMIN", ["Branches", "Products", "Inventory", "Orders", "Inquiries"]], ["STAFF", ["Branches", "Products", "Inventory", "Orders", "Inquiries"]]]) {
     const h = harness("../app/application-header.tsx", role ? user(role) : null);
     const tree = h.render();
     const nav = nodes(tree).find((n) => n.type === "nav");
@@ -49,7 +50,7 @@ test("active routes and mobile menu toggle, link closing, route closing and Esca
   toggle(tree).props.onClick(); h.route("/support"); tree = h.render(); assert.equal(toggle(tree).props["aria-expanded"], false);
   toggle(tree).props.onClick(); tree = h.render(); tree.props.onKeyDown({ key: "Escape" });
   assert.equal(h.focused, true); assert.equal(toggle(h.render()).props["aria-expanded"], false);
-  for (const path of ["/orders", "/my-orders", "/support", "/support/history"]) {
+  for (const path of ["/shop", "/cart", "/my-orders", "/support", "/support/history"]) {
     h.route(path); const active = nodes(h.render()).filter((n) => n.props?.["aria-current"] === "page");
     assert.equal(active.length, 1); assert.equal(active[0].props.href, path === "/support/history" ? "/support" : path);
   }

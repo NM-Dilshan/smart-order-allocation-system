@@ -16,6 +16,7 @@ test("form invalidates previews on all allocation edits and submits current coor
   const jsx = (type, props) => ({ type, props });
   const final = { id: 10, allocation: { branchId: 2, branchName: "Final Branch" } }; let completed;
   const deps = {
+    "../cart/order-summary": { default: "OrderSummary" },
     react, "react/jsx-runtime": { jsx, jsxs: jsx }, "lucide-react": {}, "../branches/branch-dialog": { default: "dialog" },
     "./order-ui": { api: async (url, options) => {
       if (url === "/api/products") return [{ id: 1, name: "Mouse" }, { id: 2, name: "Keyboard" }];

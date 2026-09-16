@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getCurrentUser, isCustomerUser } from "@/lib/auth";
 import ApplicationHeader from "./application-header";
+import CustomerCartProvider from "./cart/cart-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,12 +23,13 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const user = await getCurrentUser();
   const headerUser = user ? { name: user.name, email: user.email, role: user.role, management: user.management, customer: isCustomerUser(user) } : null;
+  const content = <><ApplicationHeader user={headerUser} />{children}</>;
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col"><ApplicationHeader user={headerUser} />{children}</body>
+      <body className="min-h-full flex flex-col">{user && isCustomerUser(user) ? <CustomerCartProvider key={user.id}>{content}</CustomerCartProvider> : content}</body>
     </html>
   );
 }
