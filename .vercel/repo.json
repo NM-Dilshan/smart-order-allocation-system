@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_qzPZKtVaU8bsrmkW0M85W2tclWAx",
+      "name": "smart-order-allocation-system",
+      "directory": "my-app",
+      "orgId": "team_PW0eR8eOaMFqsaXiCI8WGYzy"
+    }
+  ]
+}

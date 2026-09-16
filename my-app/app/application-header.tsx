@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import AuthControls from "./auth-controls";
+import { useCustomerCart } from "./cart/cart-provider";
 
 type HeaderUser = { name: string; email: string; role: string; management: boolean; customer: boolean };
 
 export default function ApplicationHeader({ user }: { user: HeaderUser | null }) {
   const pathname = usePathname();
+  const cart = useCustomerCart();
   const [openPath, setOpenPath] = useState<string | null>(null);
   const [lastPath, setLastPath] = useState(pathname);
   const menuButton = useRef<HTMLButtonElement>(null);
@@ -21,7 +23,7 @@ export default function ApplicationHeader({ user }: { user: HeaderUser | null })
   const links = user?.management
     ? [["/branches", "Branches"], ["/products", "Products"], ["/inventory", "Inventory"], ["/orders", "Orders"], ["/admin/inquiries", "Inquiries"]]
     : user?.customer
-      ? [["/orders", "Place Order"], ["/my-orders", "My Orders"], ["/support", "Support"]]
+      ? [["/shop", "Shop"], ["/cart", `Cart (${cart?.count ?? 0})`], ["/my-orders", "My Orders"], ["/support", "Support"]]
       : user ? [] : [["/login", "Customer Login"], ["/register", "Register"]];
 
   return (
@@ -29,7 +31,7 @@ export default function ApplicationHeader({ user }: { user: HeaderUser | null })
       if (event.key === "Escape" && open) { setOpenPath(null); menuButton.current?.focus(); }
     }}>
       <div className="mx-auto flex min-h-18 max-w-7xl flex-wrap items-center gap-x-6 px-4 py-3 sm:px-6 lg:px-8">
-        <Link href={user?.management ? "/branches" : "/orders"} onClick={() => setOpenPath(null)} className="shrink-0 rounded-md text-lg font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700">Smart Order</Link>
+        <Link href={user?.management ? "/branches" : user?.customer ? "/shop" : "/orders"} onClick={() => setOpenPath(null)} className="shrink-0 rounded-md text-lg font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700">Smart Order</Link>
         {user?.management && <span className="shrink-0 rounded-md border border-teal-200 bg-teal-50 px-2 py-1 text-[11px] font-semibold tracking-wide text-teal-800">{user.role}</span>}
         <button ref={menuButton} type="button" aria-label={open ? "Close navigation menu" : "Open navigation menu"} aria-expanded={open} aria-controls="application-navigation" onClick={() => setOpenPath(open ? null : pathname)} className="ml-auto inline-flex size-10 items-center justify-center rounded-lg border border-zinc-200 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 xl:hidden">
           {open ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
