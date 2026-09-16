@@ -50,6 +50,30 @@ test("registration validates, normalizes, hashes, fixes CUSTOMER role, and handl
   throttled = true; assert.equal((await route.POST(request(body))).status, 429);
 });
 
+test("registration accepts letters and spaces, trims names, and rejects invalid names before hashing or database writes", async () => {
+  const users = []; let hashes = 0; let attempts = 0;
+  const route = load("../app/api/auth/register/route.ts", {
+    "next/server": next, "@/app/generated/prisma/client": prismaTypes,
+    "@/lib/db": { prisma: { user: { create: async ({ data }) => { users.push(data); return { id: users.length }; } } } },
+    "@/lib/auth": { validOrigin: () => true },
+    "@/lib/passwords.mjs": { hashPassword: async () => { hashes++; return "hashed-password"; } },
+    "@/lib/login-limit": { allowLogin: () => { attempts++; return true; } },
+  });
+  const body = { email: "customer@example.test", password: "long-enough-password", confirmPassword: "long-enough-password" };
+  for (const name of ["Dilshan123", "123Dilshan", "12345", "", "   ", "Kasun-Silva", "Kasun\tSilva", "A".repeat(101), null, 12345]) {
+    const result = await route.POST(request({ ...body, name }));
+    assert.equal(result.status, 400, `Invalid name must be rejected: ${JSON.stringify(name)}`);
+    const message = typeof name !== "string" || !name.trim() || name.trim().length > 100 ? "Enter a name between 1 and 100 characters." : "Name can only contain letters and spaces.";
+    assert.equal(result.body.error, message);
+  }
+  assert.equal(users.length, 0); assert.equal(hashes, 0); assert.equal(attempts, 0);
+  for (const name of ["Dilshan Perera", "N M Dilshan", "Kasun Silva", "  Dilshan Perera  ", "José Silva", "දිල්ශන්"]) {
+    assert.equal((await route.POST(request({ ...body, name }))).status, 201);
+    assert.equal(users.at(-1).name, name.trim());
+  }
+  assert.equal(hashes, users.length); assert.equal(attempts, users.length);
+});
+
 test("customer session owns placement and reads; guests, other customers, and management cannot bypass authorization", async () => {
   const jar = new Map();
   const cookieStore = { has: (name) => jar.has(name), get: (name) => jar.has(name) ? { value: jar.get(name) } : undefined,

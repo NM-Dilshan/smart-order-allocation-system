@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return NextResponse.json({ error: "Invalid registration request." }, { status: 400 });
   const { name, email, password, confirmPassword } = body as Record<string, unknown>;
   if (typeof name !== "string" || !name.trim() || name.trim().length > 100) return NextResponse.json({ error: "Enter a name between 1 and 100 characters." }, { status: 400 });
+  if (!/^(?:\p{L}\p{M}*| )+$/u.test(name.trim())) return NextResponse.json({ error: "Name can only contain letters and spaces." }, { status: 400 });
   if (typeof email !== "string" || email.trim().length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().toLowerCase().endsWith("@smart-order.invalid")) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
   if (typeof password !== "string" || password.length < 12 || password.length > 256) return NextResponse.json({ error: "Use a password between 12 and 256 characters." }, { status: 400 });
   if (typeof confirmPassword !== "string" || password !== confirmPassword) return NextResponse.json({ error: "Passwords must match." }, { status: 400 });

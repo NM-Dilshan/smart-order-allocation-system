@@ -44,6 +44,15 @@ test("account forms use fixed endpoints, validate confirmation, and redirect by 
     }
     // Submit with visible passwords as well: input presentation must not affect the payload.
     for (const field of passwordFields) { toggle(field).props.onClick(); render(); }
+    if (props.registration) {
+      for (const name of ["Dilshan123", "123Dilshan", "12345", "", "   ", "Kasun-Silva", "Kasun\tSilva", "A".repeat(101)]) {
+        await submit({ ...values, name });
+        assert.equal(calls.length, 0, `Invalid name must not submit: ${JSON.stringify(name)}`);
+        assert.equal(target, undefined);
+        const message = !name.trim() || name.trim().length > 100 ? "Enter a name between 1 and 100 characters." : "Name can only contain letters and spaces.";
+        assert.ok(nodes(tree).some((node) => node.props?.role === "alert" && node.props.children === message));
+      }
+    }
     if (props.registration) { await submit({ ...values, confirmPassword: "wrong" }); assert.equal(calls.length, 0); assert.ok(JSON.stringify(tree).includes("Passwords must match.")); }
     await submit(values);
     assert.equal(calls[0].path, props.registration ? "/api/auth/register" : props.management ? "/api/auth/admin/login" : "/api/auth/login");
@@ -51,5 +60,14 @@ test("account forms use fixed endpoints, validate confirmation, and redirect by 
     assert.equal(calls[0].body.password, values.password);
     if (props.registration) assert.equal(calls[0].body.confirmPassword, values.confirmPassword);
     assert.equal(target, props.registration ? "/login?registered=1" : props.management ? "/branches" : "/orders");
+    if (props.registration) {
+      for (const name of ["Dilshan Perera", "N M Dilshan", "Kasun Silva", "  Dilshan Perera  ", "José Silva", "දිල්ශන්"]) {
+        // Each valid name should produce one request with its surrounding whitespace trimmed.
+        const count = calls.length;
+        await submit({ ...values, name });
+        assert.equal(calls.length, count + 1);
+        assert.equal(calls.at(-1).body.name, name.trim());
+      }
+    }
   }
 });

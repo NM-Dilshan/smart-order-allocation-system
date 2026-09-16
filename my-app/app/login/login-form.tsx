@@ -13,12 +13,20 @@ export default function LoginForm({ management = false, registration = false, re
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (pending.current) return;
     const data = new FormData(event.currentTarget);
+    const name = data.get("name");
+    const trimmedName = typeof name === "string" ? name.trim() : "";
+    if (registration && (!trimmedName || trimmedName.length > 100)) {
+      setError("Enter a name between 1 and 100 characters."); return;
+    }
+    if (registration && !/^(?:\p{L}\p{M}*| )+$/u.test(trimmedName)) {
+      setError("Name can only contain letters and spaces."); return;
+    }
     if (registration && data.get("password") !== data.get("confirmPassword")) {
       setError("Passwords must match."); return;
     }
     pending.current = true; setBusy(true); setError("");
     try {
-      const response = await fetch(registration ? "/api/auth/register" : management ? "/api/auth/admin/login" : "/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: data.get("email"), password: data.get("password"), ...(registration ? { name: data.get("name"), confirmPassword: data.get("confirmPassword") } : {}) }) });
+      const response = await fetch(registration ? "/api/auth/register" : management ? "/api/auth/admin/login" : "/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: data.get("email"), password: data.get("password"), ...(registration ? { name: trimmedName, confirmPassword: data.get("confirmPassword") } : {}) }) });
       const body = await response.json();
       if (!response.ok) { setError(body.error ?? (registration ? "Unable to create your account." : "Unable to sign in.")); return; }
       router.replace(registration ? "/login?registered=1" : management ? "/branches" : "/orders");
