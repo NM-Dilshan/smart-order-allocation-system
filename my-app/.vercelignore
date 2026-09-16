@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+
+node_modules
+.next
+ai/.venv
+.git
+
+tsconfig.tsbuildinfo
