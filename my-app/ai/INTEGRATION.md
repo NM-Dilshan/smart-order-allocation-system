@@ -1,5 +1,7 @@
 # AI Step 2: Customer Support integration
 
+> Historical Step 2 implementation report. The subprocess architecture and deployment instructions below have been superseded by [VERCEL.md](VERCEL.md). Current inquiry inference uses a native Python HTTP function; authentication and persistence behavior remain unchanged.
+
 The existing trained Pipeline is now used to classify and save customer inquiries. Its model file, dataset, training script, vocabulary, and weights are unchanged. No retraining, JavaScript keyword classification, external AI service, automatic order action, or allocation change was added.
 
 ## Pages, APIs, and permissions

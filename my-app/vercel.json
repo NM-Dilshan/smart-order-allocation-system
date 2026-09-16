@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "functions": {
+    "api/classify_inquiry.py": {
+      "maxDuration": 30,
+      "excludeFiles": "{node_modules/**,.next/**,.git/**,.vercel/**,.env*,**/.env*,**/.venv/**,**/__pycache__/**,app/**,lib/**,public/**,prisma/**,tests/**,scripts/**,ai/data/**,ai/reports/**,ai/tests/**,ai/train.py}"
+    }
+  }
+}
