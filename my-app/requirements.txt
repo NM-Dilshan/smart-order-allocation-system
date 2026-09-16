@@ -1,0 +1,4 @@
+# Runtime only: the saved TF-IDF + LogisticRegression pipeline does not use pandas.
+# Keep these versions aligned with ai/requirements.txt and the fitted artifact.
+scikit-learn==1.9.0
+joblib==1.5.3

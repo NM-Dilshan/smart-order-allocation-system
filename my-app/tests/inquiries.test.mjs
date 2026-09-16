@@ -1,24 +1,43 @@
-import test from "node:test";
+import test, { before, after } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import path from "node:path";
 import vm from "node:vm";
 import crypto from "node:crypto";
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import ts from "typescript";
 import { getIronSession } from "iron-session";
 import { hashPassword } from "../lib/passwords.mjs";
 
-function load(file, dependencies = {}, env = process.env) {
+function load(file, dependencies = {}, env = process.env, fetcher = fetch, logger = { error() {} }) {
   const exports = {};
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(new URL(file, import.meta.url), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017, esModuleInterop: true } }).outputText, {
-    exports, Request, process: { env, cwd: () => process.cwd(), platform: process.platform }, require: (name) => { if (!(name in dependencies)) throw new Error(name); return dependencies[name]; },
+    exports, Request, URL, AbortSignal, fetch: fetcher, console: logger, process: { env, cwd: () => process.cwd(), platform: process.platform }, require: (name) => { if (!(name in dependencies)) throw new Error(name); return dependencies[name]; },
   });
   return exports;
 }
 const inquiries = load("../lib/inquiries.ts");
-const classifierDependencies = { "server-only": {}, "node:child_process": { execFile }, "node:fs": fs, "node:path": path, "@/lib/inquiries": inquiries };
-const classifier = load("../lib/ai-classifier.ts", classifierDependencies);
+const classifierDependencies = { "server-only": {}, "@/lib/inquiries": inquiries };
+const bridgeEnv = { INQUIRY_CLASSIFIER_SECRET: "test-only-token" };
+const classifier = load("../lib/ai-classifier.ts", classifierDependencies, bridgeEnv);
+let python;
+before(async () => {
+  python = spawn(process.env.PYTHON_EXECUTABLE || "python", ["-u", "-m", "api.classify_inquiry", "--port", "0"], {
+    cwd: process.cwd(), windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
+    env: { ...process.env, VERCEL: "", INQUIRY_CLASSIFIER_SECRET: bridgeEnv.INQUIRY_CLASSIFIER_SECRET },
+  });
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("Local Python HTTP function did not start")), 20000);
+    python.once("error", (error) => { clearTimeout(timer); reject(error); });
+    python.once("exit", () => { clearTimeout(timer); reject(new Error("Python HTTP function exited")); });
+    python.stdout.on("data", (data) => {
+      const url = String(data).match(/http:\/\/127\.0\.0\.1:\d+\/api\/classify_inquiry/);
+      if (url) { bridgeEnv.INQUIRY_CLASSIFIER_URL = url[0]; clearTimeout(timer); resolve(); }
+    });
+  });
+});
+after(async () => {
+  if (python && python.exitCode === null) await new Promise((resolve) => { python.once("exit", resolve); python.kill(); });
+});
 const next = { NextResponse: { json: (body, options) => ({ body, status: options?.status ?? 200, headers: options?.headers }) } };
 
 test("real Python bridge loads the saved classifier and returns its actual category/probability", async () => {
@@ -30,28 +49,32 @@ test("real Python bridge loads the saved classifier and returns its actual categ
   assert.ok(actual.confidence >= 0 && actual.confidence <= 1);
 });
 
-test("bridge passes hostile text only through stdin, bounds execution, and sanitizes failures", async () => {
-  const text = '--json " & echo secrets; $(whoami)\n????';
+test("HTTP bridge sends JSON, authenticates server calls and sanitizes failures", async () => {
+  const text = '--json " & echo secrets; $(whoami)\\n????';
   let seen;
-  const bridge = load("../lib/ai-classifier.ts", { ...classifierDependencies, "node:child_process": { execFile(executable, args, options, callback) {
-    seen = { executable, args, options };
-    return { stdin: { on() {}, end(input) {
-      assert.equal(JSON.parse(input).message, text);
-      callback(null, JSON.stringify({ category: "General Inquiry", confidence: 0.01 }));
-    } } };
-  } } }, { PYTHON_EXECUTABLE: "C:/Python path/python.exe" });
-  const result = await bridge.classifyInquiry(text);
-  assert.equal(seen.executable, "C:/Python path/python.exe");
-  assert.equal(seen.options.shell, false); assert.equal(seen.options.windowsHide, true);
-  assert.equal(seen.options.timeout, 20000); assert.equal(seen.options.maxBuffer, 16384);
-  assert.equal(seen.options.killSignal, "SIGKILL"); assert.ok(!seen.args.includes(text));
-  assert.equal(result.confidence, 0.01); // Low confidence is preserved, not rejected.
-  for (const reason of ["ENOENT", "timeout", "model missing", "maxBuffer", "Python traceback secret"]) {
-    const failed = load("../lib/ai-classifier.ts", { ...classifierDependencies, "node:child_process": { execFile(_exe, _args, _options, callback) { callback(new Error(reason), ""); return {}; } } });
-    await assert.rejects(failed.classifyInquiry("Where is my order?"), (error) => error.message === "Classification is temporarily unavailable. Please try again.");
+  const env = { VERCEL: "1", VERCEL_URL: "deployment.vercel.app", INQUIRY_CLASSIFIER_SECRET: "server-only-token", VERCEL_AUTOMATION_BYPASS_SECRET: "bypass-token" };
+  const bridge = load("../lib/ai-classifier.ts", classifierDependencies, env, async (url, options) => {
+    seen = { url, options };
+    return new Response(JSON.stringify({ category: "General Inquiry", confidence: 0.01 }));
+  });
+  assert.equal((await bridge.classifyInquiry(text)).confidence, 0.01);
+  assert.equal(seen.url.href, "https://deployment.vercel.app/api/classify_inquiry");
+  assert.equal(JSON.parse(seen.options.body).message, text);
+  assert.equal(seen.options.headers.Authorization, "Bearer server-only-token");
+  assert.equal(seen.options.headers["x-vercel-protection-bypass"], "bypass-token");
+  assert.equal(seen.options.redirect, "error"); assert.equal(seen.options.cache, "no-store");
+  assert.ok(seen.options.signal instanceof AbortSignal);
+  for (const fetcher of [
+    async () => { throw new Error("private connection detail"); },
+    async () => new Response("private traceback", { status: 503 }),
+    async () => new Response("not JSON"),
+    async () => new Response(JSON.stringify({ category: "Invented", confidence: 2 })),
+  ]) {
+    const failed = load("../lib/ai-classifier.ts", classifierDependencies, env, fetcher);
+    await assert.rejects(failed.classifyInquiry("test"), /Classification is temporarily unavailable/);
   }
-  const thrown = load("../lib/ai-classifier.ts", { ...classifierDependencies, "node:child_process": { execFile() { throw new Error("private path"); } } });
-  await assert.rejects(thrown.classifyInquiry("test"), /temporarily unavailable/);
+  const missingConfig = load("../lib/ai-classifier.ts", classifierDependencies, { VERCEL: "1" }, async () => { throw new Error("must not fetch"); });
+  await assert.rejects(missingConfig.classifyInquiry("test"), /temporarily unavailable/);
   await assert.rejects(bridge.classifyInquiry("   "), /temporarily unavailable/);
 });
 
@@ -60,6 +83,24 @@ test("prediction protocol rejects unknown labels, malformed JSON and invalid pro
     assert.throws(() => classifier.parsePrediction(output), /temporarily unavailable/);
   }
   for (const confidence of [0, 0.1, 1]) assert.equal(classifier.parsePrediction(JSON.stringify({ category: "Payment Issue", confidence })).confidence, confidence);
+});
+
+test("bridge distinguishes routing, authorization, server, timeout and prediction failures without leaking details", async () => {
+  const env = { VERCEL: "1", VERCEL_URL: "deployment.vercel.app", INQUIRY_CLASSIFIER_SECRET: "private-token" };
+  const cases = [
+    ...[[404, "endpoint-not-found"], [401, "endpoint-unauthorized"], [403, "endpoint-unauthorized"], [500, "upstream-server-error"]].map(([status, reason]) => [async () => new Response("private upstream body", { status }), reason]),
+    [async () => { throw Object.assign(new Error("private timeout detail"), { name: "TimeoutError" }); }, "timeout"],
+    [async () => new Response("not JSON"), "malformed-json"],
+    [async () => new Response(JSON.stringify({ category: "Invented", confidence: 0.4 })), "invalid-prediction"],
+    [async () => new Response(JSON.stringify({ category: "Payment Issue", confidence: 2 })), "invalid-prediction"],
+  ];
+  for (const [fetcher, reason] of cases) {
+    const logs = [];
+    const bridge = load("../lib/ai-classifier.ts", classifierDependencies, env, fetcher, { error: (...args) => logs.push(args) });
+    await assert.rejects(bridge.classifyInquiry("private customer message"), { message: "Classification is temporarily unavailable. Please try again." });
+    assert.equal(logs.at(-1)[1].reason, reason);
+    assert.ok(!JSON.stringify(logs).includes("private"));
+  }
 });
 
 test("inquiry APIs enforce sessions, roles, ownership and no writes before successful classification", async () => {

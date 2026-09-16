@@ -5,6 +5,7 @@ import { classifyInquiry } from "@/lib/ai-classifier";
 import { customerInquirySelect, managementInquirySelect, INQUIRY_LIST_LIMIT, MAX_INQUIRY_LENGTH, validateInquiryMessage } from "@/lib/inquiries";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 async function POSTHandler(user: CurrentUser, req: Request) {
   let body: unknown;
