@@ -1,10 +1,11 @@
+import { withManagement } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { branchError, deletionConflict, parseBranchId, validateBranch } from "@/lib/branches";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(_req: Request, context: Context) {
+async function GETHandler(_req: Request, context: Context) {
   const id = parseBranchId((await context.params).id);
   if (id === null) {
     return NextResponse.json({ error: "Invalid branch ID." }, { status: 400 });
@@ -20,7 +21,7 @@ export async function GET(_req: Request, context: Context) {
   }
 }
 
-export async function PUT(req: Request, context: Context) {
+async function PUTHandler(req: Request, context: Context) {
   const id = parseBranchId((await context.params).id);
   if (id === null) {
     return NextResponse.json({ error: "Invalid branch ID." }, { status: 400 });
@@ -43,7 +44,7 @@ export async function PUT(req: Request, context: Context) {
   }
 }
 
-export async function DELETE(_req: Request, context: Context) {
+async function DELETEHandler(_req: Request, context: Context) {
   const id = parseBranchId((await context.params).id);
   if (id === null) {
     return NextResponse.json({ error: "Invalid branch ID." }, { status: 400 });
@@ -77,3 +78,7 @@ export async function DELETE(_req: Request, context: Context) {
     return branchError(error);
   }
 }
+
+export const GET = withManagement(GETHandler);
+export const PUT = withManagement(PUTHandler);
+export const DELETE = withManagement(DELETEHandler);

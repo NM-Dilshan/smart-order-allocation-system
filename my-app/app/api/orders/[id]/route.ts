@@ -1,8 +1,9 @@
+import { withManagement } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { orderError, orderInclude, parseOrderId } from "@/lib/orders";
 
-export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
+async function GETHandler(_req: Request, context: { params: Promise<{ id: string }> }) {
   const id = parseOrderId((await context.params).id);
   if (id === null) return NextResponse.json({ error: "Invalid order ID." }, { status: 400 });
   try {
@@ -11,3 +12,5 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
     return NextResponse.json(order);
   } catch (error) { return orderError(error); }
 }
+
+export const GET = withManagement(GETHandler);

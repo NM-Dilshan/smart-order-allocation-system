@@ -1,3 +1,4 @@
+import { withManagement } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { deletionConflict, parseProductId, productError, validateProduct } from "@/lib/products";
@@ -16,7 +17,7 @@ export async function GET(_req: Request, context: Context) {
   }
 }
 
-export async function PUT(req: Request, context: Context) {
+async function PUTHandler(req: Request, context: Context) {
   const id = parseProductId((await context.params).id);
   if (id === null) return NextResponse.json({ error: "Invalid product ID." }, { status: 400 });
   let body: unknown;
@@ -35,7 +36,7 @@ export async function PUT(req: Request, context: Context) {
   }
 }
 
-export async function DELETE(_req: Request, context: Context) {
+async function DELETEHandler(_req: Request, context: Context) {
   const id = parseProductId((await context.params).id);
   if (id === null) return NextResponse.json({ error: "Invalid product ID." }, { status: 400 });
   try {
@@ -57,3 +58,6 @@ export async function DELETE(_req: Request, context: Context) {
     return productError(error);
   }
 }
+
+export const PUT = withManagement(PUTHandler);
+export const DELETE = withManagement(DELETEHandler);

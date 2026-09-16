@@ -18,8 +18,15 @@ model User {
   name      String
   email     String   @unique
   password  String
+  role      UserRole @default(CUSTOMER)
   orders    Order[]
   createdAt DateTime @default(now())
+}
+
+enum UserRole {
+  CUSTOMER
+  STAFF
+  ADMIN
 }
 
 model Branch {

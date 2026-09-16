@@ -5,23 +5,26 @@ import { CheckCircle2, LoaderCircle, MapPin, Plus, Trash2 } from "lucide-react";
 import ManagementDialog from "../branches/branch-dialog";
 import { api, input, message, primary, secondary, type AllocatedOrder, type Product } from "./order-ui";
 
+import type { Allocation } from "@/lib/allocation";
+
 type Row = { key: number; productId: string; quantity: string };
+type Availability = { available: boolean; bestAvailableBranch?: Allocation; message?: string; maximumStock?: { productId: number; requestedQuantity: number; maximumQuantity: number }[] };
 
 export default function OrderForm({ onClose, onComplete }: { onClose: () => void; onComplete: (order: AllocatedOrder) => void }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [catalogError, setCatalogError] = useState("");
   const [version, setVersion] = useState(0);
-  const [location, setLocation] = useState({ latitude: "", longitude: "" });
+  const [location, setLocationState] = useState({ latitude: "", longitude: "" });
   const [rows, setRowsState] = useState<Row[]>([{ key: 0, productId: "", quantity: "1" }]);
   const nextKey = useRef(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
-  const [availability, setAvailability] = useState<{ signature: string; available: boolean; message?: string } | null>(null);
-  const signature = JSON.stringify(rows.map(({ productId, quantity }) => ({ productId, quantity })));
-  const available = availability?.signature === signature && availability.available;
+  const [availability, setAvailability] = useState<(Availability & { signature: string }) | null>(null);
+  const signature = JSON.stringify({ location, items: rows.map(({ productId, quantity }) => ({ productId, quantity })) });
+  const available = availability?.signature === signature && availability.available && !!availability.bestAvailableBranch;
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState("");
   const [locationStatus, setLocationStatus] = useState("");
@@ -65,6 +68,11 @@ export default function OrderForm({ onClose, onComplete }: { onClose: () => void
     } catch { if (finish()) setLocationError("Unable to access your location. Enter coordinates manually."); }
   }
 
+  function setLocation(value: SetStateAction<typeof location>) {
+    setAvailability(null);
+    setLocationState(value);
+  }
+
   function setRows(value: SetStateAction<Row[]>) {
     setAvailability(null);
     setRowsState(value);
@@ -94,7 +102,7 @@ export default function OrderForm({ onClose, onComplete }: { onClose: () => void
     pending.current = true; setBusy(true); setError("");
     try {
       if (!available) {
-        const result = await api<{ available: boolean; message?: string }>("/api/orders/availability", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: rows.map((row) => ({ productId: Number(row.productId), quantity: Number(row.quantity) })) }) });
+        const result = await api<Availability>("/api/orders/availability", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerLatitude: Number(location.latitude), customerLongitude: Number(location.longitude), items: rows.map((row) => ({ productId: Number(row.productId), quantity: Number(row.quantity) })) }) });
         setAvailability({ ...result, signature });
         return;
       }
@@ -124,7 +132,26 @@ export default function OrderForm({ onClose, onComplete }: { onClose: () => void
           </fieldset>
           {catalogError && <div role="alert" className="space-y-3 text-sm text-red-700"><p>{catalogError}</p><button type="button" className={secondary} onClick={() => { setLoading(true); setCatalogError(""); setVersion((v) => v + 1); }}>Retry products</button></div>}
           {error && <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-          {availability?.signature === signature && <p role="status" className={`rounded-md border p-3 text-sm ${available ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-red-800"}`}>{available ? "Stock available. Ready to place your order." : availability.message ?? "No single branch currently has enough stock to fulfill this order."}</p>}
+          {availability?.signature === signature && <div role="status" className={`rounded-md border p-3 text-sm ${available ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-red-800"}`}>
+            <p>{available ? "Available for Allocation" : availability.message ?? "No single branch currently has enough stock to fulfill this order."}</p>
+            {available && availability.bestAvailableBranch && <div className="mt-4 space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide">Best Available Branch</h3>
+              <p className="break-words text-lg font-semibold">{availability.bestAvailableBranch.branchName}</p>
+              <dl className="grid gap-3 sm:grid-cols-2">
+                <div><dt>Distance</dt><dd className="font-semibold">{availability.bestAvailableBranch.distanceKm.toFixed(2)} km</dd></div>
+                <div><dt>Current Workload</dt><dd className="font-semibold">{availability.bestAvailableBranch.workload} active {availability.bestAvailableBranch.workload === 1 ? "order" : "orders"}</dd></div>
+              </dl>
+              <p className="flex items-center gap-2"><CheckCircle2 size={16} aria-hidden="true" />Can fulfill all requested items</p>
+              <p>Preview only. Stock and workload are checked again when you place your order; the allocated branch may change.</p>
+            </div>}
+            {!available && !!availability.maximumStock?.length && <>
+              <p className="mt-3 font-semibold">Maximum stock at a single branch</p>
+              <ul className="mt-2 space-y-2">{availability.maximumStock.map((item) => <li key={item.productId} className="break-words [overflow-wrap:anywhere]">
+                <span className="font-medium">{products.find((product) => product.id === item.productId)?.name ?? `Product #${item.productId}`}</span>: {item.maximumQuantity} available (requested {item.requestedQuantity})
+              </li>)}</ul>
+              {availability.maximumStock.length > 1 && <p className="mt-3">These maximums may be at different branches. One branch must have enough stock for all items.</p>}
+            </>}
+          </div>}
         </div>
         <div className="flex flex-wrap justify-end gap-3 border-t border-zinc-200 bg-zinc-50 px-6 py-4"><button type="button" className={secondary} onClick={onClose} disabled={busy}>Cancel</button><button type="submit" className={primary} disabled={busy || locating || loading || !!catalogError || !products.length}>{busy ? <LoaderCircle size={16} className="motion-safe:animate-spin" aria-hidden="true" /> : <CheckCircle2 size={16} aria-hidden="true" />}{busy ? available ? "Placing order..." : "Checking availability..." : available ? "Place Order" : "Check Availability"}</button></div>
       </form>

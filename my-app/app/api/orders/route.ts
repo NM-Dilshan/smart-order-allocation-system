@@ -1,10 +1,12 @@
+import { withManagement } from "@/lib/auth";
+import { getAssessmentCustomer } from "@/lib/assessment-customer";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { allocateOrder } from "@/lib/allocation";
 import { deductOrderStock } from "@/lib/order-stock";
 import { orderError, orderInclude, validateOrder } from "@/lib/orders";
 
-export async function GET() {
+async function GETHandler() {
   try {
     return NextResponse.json(await prisma.order.findMany({ orderBy: { id: "desc" }, include: orderInclude }));
   } catch (error) { return orderError(error); }
@@ -28,13 +30,7 @@ export async function POST(req: Request) {
 
       await deductOrderStock(tx, allocation.branchId, items);
 
-      // A dedicated non-login customer satisfies the existing required User relation.
-      const customer = await tx.user.upsert({
-        where: { email: "assessment-customer@smart-order.invalid" },
-        update: {},
-        create: { name: "Assessment Customer", email: "assessment-customer@smart-order.invalid", password: "!login-disabled-assessment-customer" },
-        select: { id: true },
-      });
+      const customer = await getAssessmentCustomer(tx);
       const created = await tx.order.create({
         data: { customerLatitude, customerLongitude, userId: customer.id, branchId: allocation.branchId, status: "ALLOCATED", items: { create: items } },
         include: orderInclude,
@@ -46,3 +42,5 @@ export async function POST(req: Request) {
     return NextResponse.json(order, { status: 201 });
   } catch (error) { return orderError(error); }
 }
+
+export const GET = withManagement(GETHandler);
