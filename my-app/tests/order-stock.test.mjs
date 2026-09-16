@@ -20,12 +20,18 @@ const orders = load("../lib/orders.ts", { "@/lib/order-stock": stock, "next/serv
 test("A/B: availability uses one branch for all items, never combined totals", async () => {
   let inventories = [{ 1: 10 }, { 1: 20 }, { 1: 5 }];
   const db = {
+    order: { groupBy: async () => [] },
+    branchInventory: { groupBy: async ({ where }) => where.productId.in.map((productId) => ({ productId, _max: { quantity: Math.max(0, ...inventories.map((inventory) => inventory[productId] ?? 0)) } })) },
     product: { findMany: async ({ where }) => where.id.in.map((id) => ({ id })) },
-    branch: { findMany: async ({ where }) => inventories.filter((inventory) => where.AND.every(({ inventories: { some } }) => (inventory[some.productId] ?? 0) >= some.quantity.gte)) },
+    branch: { findMany: async ({ where }) => inventories.map((stock, index) => ({ ...stock, id: index + 1, name: `Branch ${index + 1}`, latitude: 0, longitude: index + 1 })).filter((inventory) => where.AND.every(({ inventories: { some } }) => (inventory[some.productId] ?? 0) >= some.quantity.gte)) },
   };
   const route = load("../app/api/orders/availability/route.ts", { "next/server": response, "@/lib/db": { prisma: db }, "@/lib/orders": orders, "@/lib/allocation": allocation });
-  const check = (items) => route.POST({ json: async () => ({ items }) });
-  assert.equal((await check([{ productId: 1, quantity: 25 }])).body.available, false);
+  const check = (items) => route.POST({ json: async () => ({ customerLatitude: 0, customerLongitude: 0, items }) });
+  const unavailable = (await check([{ productId: 1, quantity: 25 }])).body;
+  assert.equal(unavailable.available, false);
+  assert.equal(unavailable.maximumStock, undefined);
+  assert.equal(unavailable.bestAvailableBranch, undefined);
+  assert.equal((await check([{ productId: 99, quantity: 1 }])).body.available, false);
   inventories = [{ 1: 20, 2: 2 }, { 1: 10, 2: 8 }];
   assert.equal((await check([{ productId: 1, quantity: 10 }, { productId: 2, quantity: 5 }])).body.available, true);
   inventories = [{ 1: 20, 2: 2 }, { 1: 2, 2: 8 }];
@@ -67,6 +73,8 @@ function database(initial) {
 function route(db) {
   return load("../app/api/orders/route.ts", {
     "next/server": response, "@/lib/db": { prisma: db }, "@/lib/orders": orders, "@/lib/order-stock": stock,
+    "@/lib/auth": { withManagement: (handler) => handler, withCustomer: (handler) => (...args) => handler({ id: 15, role: "CUSTOMER" }, ...args) },
+    "@/lib/assessment-customer": { getAssessmentCustomer: (tx) => tx.user.upsert({}) },
     // Force a previously eligible selection to exercise stock changes after allocation.
     "@/lib/allocation": { allocateOrder: async () => ({ branchId: 1, branchName: "Selected" }) },
   });

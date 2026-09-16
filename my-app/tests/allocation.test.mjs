@@ -71,7 +71,7 @@ test("E/integration: 409 has no writes; successful allocation deducts selected i
     tx.product = { findMany: async () => [{ id: 1 }] };
     tx.user = { upsert: async () => { writes++; return { id: 7 }; } };
     tx.order.create = async ({ data }) => {
-      writes++; assert.equal(data.status, "ALLOCATED"); assert.equal(data.branchId, 1);
+      writes++; assert.equal(data.userId, 15); assert.equal(data.status, "ALLOCATED"); assert.equal(data.branchId, 1);
       return { id: 3, ...data };
     };
     tx.branchInventory = { updateMany: async ({ where, data }) => {
@@ -84,6 +84,8 @@ test("E/integration: 409 has no writes; successful allocation deducts selected i
   const route = load("../app/api/orders/route.ts", {
     "next/server": { NextResponse: { json: (body, init) => ({ body, status: init?.status ?? 200 }) } },
     "@/lib/db": { prisma: db }, "@/lib/allocation": allocation,
+    "@/lib/auth": { withManagement: (handler) => handler, withCustomer: (handler) => (...args) => handler({ id: 15, role: "CUSTOMER" }, ...args) },
+    "@/lib/assessment-customer": { getAssessmentCustomer: (tx) => tx.user.upsert({}) },
     "@/lib/order-stock": stock,
     "@/lib/orders": { validateOrder, orderInclude, orderError: (error) => { throw error; } },
   });
@@ -92,6 +94,44 @@ test("E/integration: 409 has no writes; successful allocation deducts selected i
   assert.equal(failed.status, 409); assert.equal(writes, 0);
   eligible = true;
   const success = await route.POST(request);
-  assert.equal(success.status, 201); assert.equal(writes, 2);
+  assert.equal(success.status, 201); assert.equal(writes, 1);
   assert.equal(success.body.id, 3); assert.equal(success.body.allocation.branchId, 1);
+});
+
+test("availability selects the full score winner, excludes insufficient nearest stock, and validates coordinates", async () => {
+  let branches = [branch(1, 0.01, { 1: 1 }), branch(2, 0.02, { 1: 10 })];
+  let workloads = [];
+  const db = {
+    product: { findMany: async () => [{ id: 1 }] },
+    branch: { findMany: (args) => transaction(branches).branch.findMany(args) },
+    order: { groupBy: (args) => transaction(branches, workloads).order.groupBy(args) },
+  };
+  const response = { NextResponse: { json: (body, init) => ({ body, status: init?.status ?? 200 }) } };
+  const orders = load("../lib/orders.ts", { "@/app/generated/prisma/client": { Prisma: {} }, "next/server": response, "@/lib/order-stock": stock });
+  const preview = load("../app/api/orders/availability/route.ts", { "next/server": response, "@/lib/db": { prisma: db }, "@/lib/orders": orders, "@/lib/allocation": allocation });
+  const body = { customerLatitude: 0, customerLongitude: 0, items: [{ productId: 1, quantity: 3 }] };
+  assert.equal((await preview.POST({ json: async () => body })).body.bestAvailableBranch.branchId, 2);
+  branches = [branch(1, 1, { 1: 10 }), branch(2, 1.1, { 1: 10 })];
+  workloads = [{ branchId: 1, _count: { _all: 10 } }];
+  const weighted = (await preview.POST({ json: async () => body })).body.bestAvailableBranch;
+  assert.equal(weighted.branchId, 2); assert.equal(weighted.score, 0.7);
+  for (const value of [undefined, "0", 91, NaN]) {
+    assert.equal((await preview.POST({ json: async () => ({ ...body, customerLatitude: value }) })).status, 400);
+  }
+  workloads = [];
+  assert.equal((await preview.POST({ json: async () => body })).body.bestAvailableBranch.branchId, 1);
+  // Stock changes after the preview: placement must run the real service again.
+  branches[0].stock[1] = 0;
+  let deductedBranch;
+  db.$transaction = async (callback) => callback({ ...db,
+    branchInventory: { updateMany: async ({ where }) => { deductedBranch = where.branchId; return { count: 1 }; } },
+    order: { ...db.order, create: async ({ data }) => ({ id: 1, ...data }) },
+  });
+  const final = load("../app/api/orders/route.ts", {
+    "next/server": response, "@/lib/db": { prisma: db }, "@/lib/orders": orders, "@/lib/allocation": allocation,
+    "@/lib/order-stock": stock, "@/lib/auth": { withManagement: (handler) => handler, withCustomer: (handler) => (...args) => handler({ id: 15, role: "CUSTOMER" }, ...args) },
+    "@/lib/assessment-customer": { getAssessmentCustomer: async () => ({ id: 1 }) },
+  });
+  const placed = await final.POST({ json: async () => ({ ...body, branchId: 1 }) });
+  assert.equal(placed.status, 201); assert.equal(placed.body.allocation.branchId, 2); assert.equal(deductedBranch, 2);
 });

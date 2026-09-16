@@ -1,8 +1,9 @@
+import { withManagement } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { branchError, validateBranch } from "@/lib/branches";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+async function GETHandler() {
   try {
     const branches = await prisma.branch.findMany({ orderBy: { id: "desc" } });
     return NextResponse.json(branches);
@@ -11,7 +12,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   let body: unknown;
   try {
     body = await req.json();
@@ -29,3 +30,6 @@ export async function POST(req: Request) {
     return branchError(error);
   }
 }
+
+export const GET = withManagement(GETHandler);
+export const POST = withManagement(POSTHandler);

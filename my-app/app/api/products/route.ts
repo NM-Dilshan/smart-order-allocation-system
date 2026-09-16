@@ -1,3 +1,4 @@
+import { withManagement } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { productError, validateProduct } from "@/lib/products";
 import { NextResponse } from "next/server";
@@ -11,7 +12,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   let body: unknown;
   try {
     body = await req.json();
@@ -27,3 +28,5 @@ export async function POST(req: Request) {
     return productError(error);
   }
 }
+
+export const POST = withManagement(POSTHandler);

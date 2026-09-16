@@ -1,8 +1,9 @@
+import { withManagement } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { inventoryError, inventoryInclude, parseInventoryId, validId, validateQuantity } from "@/lib/inventory";
 
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   const value = new URL(req.url).searchParams.get("branchId");
   const branchId = value === null ? undefined : parseInventoryId(value);
   if (branchId === null) return NextResponse.json({ error: "Invalid branch ID." }, { status: 400 });
@@ -16,7 +17,7 @@ export async function GET(req: Request) {
   } catch (error) { return inventoryError(error); }
 }
 
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   let body: unknown;
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
@@ -32,3 +33,6 @@ export async function POST(req: Request) {
     return NextResponse.json(record, { status: 201 });
   } catch (error) { return inventoryError(error); }
 }
+
+export const GET = withManagement(GETHandler);
+export const POST = withManagement(POSTHandler);

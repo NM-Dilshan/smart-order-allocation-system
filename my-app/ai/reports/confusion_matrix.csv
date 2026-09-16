@@ -1,0 +1,9 @@
+actual / predicted,Account/Login Issue,Delivery Issue,General Inquiry,Order Status Inquiry,Payment Issue,Product/Stock Inquiry,Promotion/Discount Inquiry,Refund/Cancellation
+Account/Login Issue,9,0,0,0,0,0,0,0
+Delivery Issue,1,6,0,2,0,0,0,0
+General Inquiry,0,0,3,0,0,2,2,0
+Order Status Inquiry,0,0,0,8,1,0,0,0
+Payment Issue,0,0,0,0,9,0,0,0
+Product/Stock Inquiry,0,0,0,0,0,9,0,0
+Promotion/Discount Inquiry,0,0,0,0,0,1,9,0
+Refund/Cancellation,0,0,0,3,0,0,0,6

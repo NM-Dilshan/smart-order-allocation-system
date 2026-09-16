@@ -1,10 +1,11 @@
+import { withManagement } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { inventoryError, inventoryInclude, parseInventoryId, validateQuantity } from "@/lib/inventory";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(_req: Request, context: Context) {
+async function GETHandler(_req: Request, context: Context) {
   const id = parseInventoryId((await context.params).id);
   if (id === null) return NextResponse.json({ error: "Invalid inventory ID." }, { status: 400 });
   try {
@@ -14,7 +15,7 @@ export async function GET(_req: Request, context: Context) {
   } catch (error) { return inventoryError(error); }
 }
 
-export async function PUT(req: Request, context: Context) {
+async function PUTHandler(req: Request, context: Context) {
   const id = parseInventoryId((await context.params).id);
   if (id === null) return NextResponse.json({ error: "Invalid inventory ID." }, { status: 400 });
   let body: unknown;
@@ -28,7 +29,7 @@ export async function PUT(req: Request, context: Context) {
   } catch (error) { return inventoryError(error); }
 }
 
-export async function DELETE(_req: Request, context: Context) {
+async function DELETEHandler(_req: Request, context: Context) {
   const id = parseInventoryId((await context.params).id);
   if (id === null) return NextResponse.json({ error: "Invalid inventory ID." }, { status: 400 });
   try {
@@ -45,3 +46,7 @@ export async function DELETE(_req: Request, context: Context) {
     return NextResponse.json({ message: "Inventory record removed successfully." });
   } catch (error) { return inventoryError(error); }
 }
+
+export const GET = withManagement(GETHandler);
+export const PUT = withManagement(PUTHandler);
+export const DELETE = withManagement(DELETEHandler);

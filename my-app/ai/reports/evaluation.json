@@ -1,0 +1,423 @@
+{
+  "dataset_path": "ai/data/Customer_Message_Dataset.csv",
+  "dataset_sha256": "39c8a72503ddd54b8f0435bb9bfd72d1c6695ad964bdebfe388821e8d3022aa1",
+  "dataset": {
+    "columns": [
+      "id",
+      "message",
+      "category"
+    ],
+    "message_column": "message",
+    "label_column": "category",
+    "id_column": "id",
+    "original_rows": 450,
+    "sample_records": [
+      {
+        "id": "447",
+        "message": "Why is my promo code not working?",
+        "category": ""
+      },
+      {
+        "id": "277",
+        "message": "I cannot access my account",
+        "category": "Account/Login Issue"
+      },
+      {
+        "id": "255",
+        "message": "Has the branch accepted my ORDER?",
+        "category": "Order Status Inquiry"
+      },
+      {
+        "id": "84",
+        "message": "My order was marked delivered too early",
+        "category": "Delivery Issue"
+      },
+      {
+        "id": "291",
+        "message": "I cannot sign in from the website",
+        "category": "Account/Login Issue"
+      },
+      {
+        "id": "220",
+        "message": "Is chocolate milk tea available?",
+        "category": "Product/Stock Inquiry"
+      },
+      {
+        "id": "256",
+        "message": "where is my order in the preparation process?",
+        "category": "Order Status Inquiry"
+      },
+      {
+        "id": "231",
+        "message": "I need to know whether my order is confirmed Please advise.",
+        "category": "Order Status Inquiry"
+      }
+    ],
+    "missing_values": {
+      "id": {
+        "null_or_empty": 0,
+        "whitespace_only": 0
+      },
+      "message": {
+        "null_or_empty": 15,
+        "whitespace_only": 0
+      },
+      "category": {
+        "null_or_empty": 10,
+        "whitespace_only": 0
+      }
+    },
+    "invalid_rows_removed": 24,
+    "exact_full_row_duplicates": 0,
+    "exact_trimmed_message_category_duplicates": 74,
+    "empty_token_rows_removed": 0,
+    "additional_equivalent_input_duplicates": 1,
+    "total_duplicate_examples_removed": 75,
+    "conflicting_input_groups": 0,
+    "usable_rows": 351,
+    "original_labeled_distribution": {
+      "Account/Login Issue": 55,
+      "Delivery Issue": 55,
+      "General Inquiry": 55,
+      "Order Status Inquiry": 55,
+      "Payment Issue": 55,
+      "Product/Stock Inquiry": 55,
+      "Promotion/Discount Inquiry": 55,
+      "Refund/Cancellation": 55
+    },
+    "valid_before_dedup_distribution": {
+      "Account/Login Issue": 53,
+      "Delivery Issue": 53,
+      "General Inquiry": 54,
+      "Order Status Inquiry": 53,
+      "Payment Issue": 53,
+      "Product/Stock Inquiry": 53,
+      "Promotion/Discount Inquiry": 54,
+      "Refund/Cancellation": 53
+    },
+    "cleaned_distribution": {
+      "Account/Login Issue": 46,
+      "Delivery Issue": 46,
+      "General Inquiry": 33,
+      "Order Status Inquiry": 46,
+      "Payment Issue": 45,
+      "Product/Stock Inquiry": 45,
+      "Promotion/Discount Inquiry": 46,
+      "Refund/Cancellation": 44
+    },
+    "largest_to_smallest_class_ratio": 1.393939393939394
+  },
+  "split": {
+    "random_state": 42,
+    "requested_test_fraction": 0.2,
+    "stratified": true,
+    "common_classes_stratified": true,
+    "training_rows": 280,
+    "test_rows": 71,
+    "notes": [],
+    "training_distribution": {
+      "Account/Login Issue": 37,
+      "Delivery Issue": 37,
+      "General Inquiry": 26,
+      "Order Status Inquiry": 37,
+      "Payment Issue": 36,
+      "Product/Stock Inquiry": 36,
+      "Promotion/Discount Inquiry": 36,
+      "Refund/Cancellation": 35
+    },
+    "test_distribution": {
+      "Account/Login Issue": 9,
+      "Delivery Issue": 9,
+      "General Inquiry": 7,
+      "Order Status Inquiry": 9,
+      "Payment Issue": 9,
+      "Product/Stock Inquiry": 9,
+      "Promotion/Discount Inquiry": 10,
+      "Refund/Cancellation": 9
+    },
+    "duplicate_input_overlap": 0
+  },
+  "versions": {
+    "python": "3.14.7",
+    "pandas": "3.0.5",
+    "scikit-learn": "1.9.0",
+    "joblib": "1.5.3"
+  },
+  "vectorizer": {
+    "analyzer": "word",
+    "binary": false,
+    "decode_error": "strict",
+    "dtype": "<class 'numpy.float64'>",
+    "encoding": "utf-8",
+    "input": "content",
+    "lowercase": true,
+    "max_df": 1.0,
+    "max_features": null,
+    "min_df": 1,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "norm": "l2",
+    "preprocessor": null,
+    "smooth_idf": true,
+    "stop_words": null,
+    "strip_accents": null,
+    "sublinear_tf": true,
+    "token_pattern": "(?u)\\b\\w\\w+\\b",
+    "tokenizer": null,
+    "use_idf": true,
+    "vocabulary": null
+  },
+  "classifier": {
+    "C": 1.0,
+    "class_weight": null,
+    "dual": false,
+    "fit_intercept": true,
+    "intercept_scaling": 1,
+    "l1_ratio": 0.0,
+    "max_iter": 1000,
+    "n_jobs": null,
+    "penalty": "deprecated",
+    "random_state": 42,
+    "solver": "lbfgs",
+    "tol": 0.0001,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "feature_count": 1320,
+  "training_accuracy": 1.0,
+  "test_accuracy": 0.8309859154929577,
+  "classification_report": {
+    "Account/Login Issue": {
+      "precision": 0.9,
+      "recall": 1.0,
+      "f1-score": 0.9473684210526315,
+      "support": 9.0
+    },
+    "Delivery Issue": {
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.8,
+      "support": 9.0
+    },
+    "General Inquiry": {
+      "precision": 1.0,
+      "recall": 0.42857142857142855,
+      "f1-score": 0.6,
+      "support": 7.0
+    },
+    "Order Status Inquiry": {
+      "precision": 0.6153846153846154,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.7272727272727273,
+      "support": 9.0
+    },
+    "Payment Issue": {
+      "precision": 0.9,
+      "recall": 1.0,
+      "f1-score": 0.9473684210526315,
+      "support": 9.0
+    },
+    "Product/Stock Inquiry": {
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1-score": 0.8571428571428571,
+      "support": 9.0
+    },
+    "Promotion/Discount Inquiry": {
+      "precision": 0.8181818181818182,
+      "recall": 0.9,
+      "f1-score": 0.8571428571428571,
+      "support": 10.0
+    },
+    "Refund/Cancellation": {
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.8,
+      "support": 9.0
+    },
+    "accuracy": 0.8309859154929577,
+    "macro avg": {
+      "precision": 0.8729458041958043,
+      "recall": 0.8188492063492063,
+      "f1-score": 0.8170369104579631,
+      "support": 71.0
+    },
+    "weighted avg": {
+      "precision": 0.8685954890180243,
+      "recall": 0.8309859154929577,
+      "f1-score": 0.8237154987340309,
+      "support": 71.0
+    }
+  },
+  "labels": [
+    "Account/Login Issue",
+    "Delivery Issue",
+    "General Inquiry",
+    "Order Status Inquiry",
+    "Payment Issue",
+    "Product/Stock Inquiry",
+    "Promotion/Discount Inquiry",
+    "Refund/Cancellation"
+  ],
+  "confusion_matrix": [
+    [
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      6,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      3,
+      0,
+      0,
+      2,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      8,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      9,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      9,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      9,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      6
+    ]
+  ],
+  "confusions": [
+    {
+      "actual": "Refund/Cancellation",
+      "predicted": "Order Status Inquiry",
+      "count": 3
+    },
+    {
+      "actual": "Delivery Issue",
+      "predicted": "Order Status Inquiry",
+      "count": 2
+    },
+    {
+      "actual": "General Inquiry",
+      "predicted": "Product/Stock Inquiry",
+      "count": 2
+    },
+    {
+      "actual": "General Inquiry",
+      "predicted": "Promotion/Discount Inquiry",
+      "count": 2
+    },
+    {
+      "actual": "Delivery Issue",
+      "predicted": "Account/Login Issue",
+      "count": 1
+    },
+    {
+      "actual": "Order Status Inquiry",
+      "predicted": "Payment Issue",
+      "count": 1
+    },
+    {
+      "actual": "Promotion/Discount Inquiry",
+      "predicted": "Product/Stock Inquiry",
+      "count": 1
+    }
+  ],
+  "sample_predictions": [
+    {
+      "message": "Where is my order?",
+      "category": "Order Status Inquiry",
+      "confidence": 0.48953044144599595,
+      "equivalent_dataset_match": "not in cleaned dataset"
+    },
+    {
+      "message": "I cannot login to my account",
+      "category": "Account/Login Issue",
+      "confidence": 0.6866294091079524,
+      "equivalent_dataset_match": "not in cleaned dataset"
+    },
+    {
+      "message": "Is this product available?",
+      "category": "Product/Stock Inquiry",
+      "confidence": 0.43654001209619137,
+      "equivalent_dataset_match": "not in cleaned dataset"
+    },
+    {
+      "message": "My payment failed",
+      "category": "Payment Issue",
+      "confidence": 0.5244521138318814,
+      "equivalent_dataset_match": "not in cleaned dataset"
+    },
+    {
+      "message": "I want to cancel my order",
+      "category": "Refund/Cancellation",
+      "confidence": 0.4070939265143022,
+      "equivalent_dataset_match": "training"
+    },
+    {
+      "message": "Do you have any discounts today?",
+      "category": "Promotion/Discount Inquiry",
+      "confidence": 0.33051703900108054,
+      "equivalent_dataset_match": "not in cleaned dataset"
+    }
+  ],
+  "model_path": "ai/models/customer_message_classifier.joblib",
+  "model_sha256": "c5175ba2d7d26f69eed9d21d4532074833a0a7e06b5fcde1566813431deba634"
+}

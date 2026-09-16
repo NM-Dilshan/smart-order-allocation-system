@@ -1,0 +1,4 @@
+# Local Python environments and bytecode only; dataset/model/reports remain visible.
+.venv/
+__pycache__/
+*.py[cod]

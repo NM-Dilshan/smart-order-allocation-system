@@ -1,0 +1,352 @@
+source_record,id,category,partition
+2,277,Account/Login Issue,training
+3,255,Order Status Inquiry,test
+4,84,Delivery Issue,training
+5,291,Account/Login Issue,training
+6,220,Product/Stock Inquiry,training
+7,256,Order Status Inquiry,training
+8,231,Order Status Inquiry,test
+9,437,General Inquiry,test
+10,373,Promotion/Discount Inquiry,test
+11,104,Delivery Issue,test
+12,343,Promotion/Discount Inquiry,test
+13,216,Product/Stock Inquiry,training
+14,338,Promotion/Discount Inquiry,training
+15,152,Refund/Cancellation,training
+16,271,Order Status Inquiry,training
+17,339,Promotion/Discount Inquiry,training
+18,298,Account/Login Issue,training
+19,202,Product/Stock Inquiry,training
+20,435,General Inquiry,training
+21,319,Account/Login Issue,training
+22,249,Order Status Inquiry,test
+23,98,Delivery Issue,training
+24,257,Order Status Inquiry,training
+25,40,Payment Issue,training
+26,61,Delivery Issue,training
+27,266,Order Status Inquiry,training
+28,135,Refund/Cancellation,training
+29,382,Promotion/Discount Inquiry,test
+30,72,Delivery Issue,training
+31,207,Product/Stock Inquiry,test
+32,349,Promotion/Discount Inquiry,training
+33,101,Delivery Issue,training
+34,275,Order Status Inquiry,training
+35,322,Account/Login Issue,training
+36,114,Refund/Cancellation,test
+37,263,Order Status Inquiry,training
+38,328,Account/Login Issue,training
+39,369,Promotion/Discount Inquiry,training
+40,379,Promotion/Discount Inquiry,training
+41,436,General Inquiry,training
+43,226,Order Status Inquiry,training
+45,239,Order Status Inquiry,training
+47,213,Product/Stock Inquiry,training
+48,218,Product/Stock Inquiry,test
+50,161,Refund/Cancellation,training
+51,228,Order Status Inquiry,training
+52,305,Account/Login Issue,training
+56,341,Promotion/Discount Inquiry,test
+57,360,Promotion/Discount Inquiry,training
+58,130,Refund/Cancellation,training
+59,201,Product/Stock Inquiry,training
+60,18,Payment Issue,training
+61,99,Delivery Issue,test
+62,140,Refund/Cancellation,training
+63,58,Delivery Issue,test
+65,225,Order Status Inquiry,training
+66,233,Order Status Inquiry,test
+67,118,Refund/Cancellation,test
+68,29,Payment Issue,test
+69,375,Promotion/Discount Inquiry,training
+70,124,Refund/Cancellation,test
+72,401,General Inquiry,training
+73,386,General Inquiry,training
+74,426,General Inquiry,training
+75,410,General Inquiry,training
+76,2,Payment Issue,training
+78,77,Delivery Issue,test
+79,394,General Inquiry,test
+80,111,Refund/Cancellation,training
+81,408,General Inquiry,training
+82,315,Account/Login Issue,test
+83,391,General Inquiry,training
+84,1,Payment Issue,training
+85,370,Promotion/Discount Inquiry,test
+86,258,Order Status Inquiry,training
+87,147,Refund/Cancellation,training
+88,352,Promotion/Discount Inquiry,training
+89,45,Payment Issue,test
+90,425,General Inquiry,test
+91,176,Product/Stock Inquiry,training
+92,286,Account/Login Issue,training
+94,85,Delivery Issue,training
+95,194,Product/Stock Inquiry,training
+96,44,Payment Issue,training
+98,282,Account/Login Issue,training
+99,333,Promotion/Discount Inquiry,training
+100,309,Account/Login Issue,test
+101,112,Refund/Cancellation,training
+102,70,Delivery Issue,training
+103,221,Order Status Inquiry,training
+104,25,Payment Issue,test
+105,171,Product/Stock Inquiry,training
+106,230,Order Status Inquiry,training
+107,122,Refund/Cancellation,test
+108,31,Payment Issue,test
+109,46,Payment Issue,training
+110,154,Refund/Cancellation,training
+111,439,General Inquiry,test
+112,311,Account/Login Issue,training
+113,406,General Inquiry,training
+114,143,Refund/Cancellation,training
+115,66,Delivery Issue,training
+116,342,Promotion/Discount Inquiry,training
+117,337,Promotion/Discount Inquiry,test
+118,195,Product/Stock Inquiry,test
+119,153,Refund/Cancellation,training
+120,232,Order Status Inquiry,training
+122,281,Account/Login Issue,training
+123,215,Product/Stock Inquiry,training
+125,317,Account/Login Issue,training
+126,136,Refund/Cancellation,training
+127,308,Account/Login Issue,training
+128,187,Product/Stock Inquiry,training
+129,78,Delivery Issue,training
+130,357,Promotion/Discount Inquiry,training
+131,132,Refund/Cancellation,test
+132,302,Account/Login Issue,training
+133,82,Delivery Issue,test
+134,378,Promotion/Discount Inquiry,training
+135,433,General Inquiry,training
+136,183,Product/Stock Inquiry,training
+137,7,Payment Issue,training
+138,371,Promotion/Discount Inquiry,training
+139,356,Promotion/Discount Inquiry,training
+141,81,Delivery Issue,training
+142,79,Delivery Issue,training
+143,177,Product/Stock Inquiry,training
+144,253,Order Status Inquiry,training
+145,191,Product/Stock Inquiry,training
+146,399,General Inquiry,training
+147,278,Account/Login Issue,training
+148,229,Order Status Inquiry,training
+149,267,Order Status Inquiry,training
+150,67,Delivery Issue,training
+152,366,Promotion/Discount Inquiry,training
+153,89,Delivery Issue,training
+154,238,Order Status Inquiry,training
+155,102,Delivery Issue,training
+156,254,Order Status Inquiry,training
+157,21,Payment Issue,training
+159,354,Promotion/Discount Inquiry,training
+160,14,Payment Issue,test
+161,395,General Inquiry,training
+162,108,Delivery Issue,test
+164,47,Payment Issue,training
+165,16,Payment Issue,training
+166,396,General Inquiry,training
+168,407,General Inquiry,training
+169,125,Refund/Cancellation,training
+170,284,Account/Login Issue,training
+171,38,Payment Issue,training
+172,3,Payment Issue,training
+173,180,Product/Stock Inquiry,test
+174,150,Refund/Cancellation,training
+175,158,Refund/Cancellation,test
+176,53,Payment Issue,training
+178,203,Product/Stock Inquiry,training
+179,30,Payment Issue,training
+180,162,Refund/Cancellation,training
+181,278,Account/Login Issue,test
+182,212,Product/Stock Inquiry,training
+184,227,Order Status Inquiry,training
+185,43,Payment Issue,training
+186,292,Account/Login Issue,training
+187,246,Order Status Inquiry,training
+189,323,Account/Login Issue,test
+190,185,Product/Stock Inquiry,training
+191,388,General Inquiry,test
+193,193,Product/Stock Inquiry,training
+194,235,Order Status Inquiry,test
+196,252,Order Status Inquiry,test
+197,223,Order Status Inquiry,training
+198,389,General Inquiry,training
+200,190,Product/Stock Inquiry,training
+201,75,Delivery Issue,training
+202,165,Refund/Cancellation,test
+203,296,Account/Login Issue,training
+204,37,Payment Issue,training
+205,184,Product/Stock Inquiry,training
+206,198,Product/Stock Inquiry,test
+208,324,Account/Login Issue,test
+209,350,Promotion/Discount Inquiry,training
+210,397,General Inquiry,training
+211,434,General Inquiry,training
+212,64,Delivery Issue,training
+214,347,Promotion/Discount Inquiry,training
+215,351,Promotion/Discount Inquiry,training
+216,86,Delivery Issue,training
+218,196,Product/Stock Inquiry,training
+219,13,Payment Issue,training
+220,83,Delivery Issue,training
+221,42,Payment Issue,training
+224,175,Product/Stock Inquiry,test
+225,117,Refund/Cancellation,training
+226,192,Product/Stock Inquiry,training
+227,295,Account/Login Issue,test
+228,283,Account/Login Issue,training
+229,409,General Inquiry,training
+231,340,Promotion/Discount Inquiry,test
+232,181,Product/Stock Inquiry,training
+233,312,Account/Login Issue,training
+234,332,Promotion/Discount Inquiry,training
+235,74,Delivery Issue,training
+236,63,Delivery Issue,test
+237,128,Refund/Cancellation,training
+239,134,Refund/Cancellation,training
+240,214,Product/Stock Inquiry,training
+241,126,Refund/Cancellation,training
+242,250,Order Status Inquiry,training
+243,372,Promotion/Discount Inquiry,training
+244,22,Payment Issue,training
+245,39,Payment Issue,training
+246,68,Delivery Issue,training
+247,166,Product/Stock Inquiry,training
+248,316,Account/Login Issue,training
+249,127,Refund/Cancellation,training
+250,248,Order Status Inquiry,training
+252,90,Delivery Issue,test
+253,400,General Inquiry,test
+254,348,Promotion/Discount Inquiry,training
+256,139,Refund/Cancellation,training
+258,368,Promotion/Discount Inquiry,training
+261,5,Payment Issue,training
+262,244,Order Status Inquiry,training
+263,119,Refund/Cancellation,training
+264,87,Delivery Issue,training
+265,26,Payment Issue,test
+266,329,Account/Login Issue,training
+269,209,Product/Stock Inquiry,training
+270,377,Promotion/Discount Inquiry,training
+272,242,Order Status Inquiry,training
+274,169,Product/Stock Inquiry,test
+276,274,Order Status Inquiry,training
+277,301,Account/Login Issue,training
+278,121,Refund/Cancellation,training
+280,56,Delivery Issue,training
+281,145,Refund/Cancellation,training
+282,115,Refund/Cancellation,training
+283,320,Account/Login Issue,training
+284,151,Refund/Cancellation,test
+285,91,Delivery Issue,training
+286,60,Delivery Issue,training
+287,300,Account/Login Issue,training
+289,403,General Inquiry,training
+290,17,Payment Issue,training
+291,186,Product/Stock Inquiry,training
+292,273,Order Status Inquiry,training
+294,418,General Inquiry,training
+295,141,Refund/Cancellation,training
+296,172,Product/Stock Inquiry,training
+297,363,Promotion/Discount Inquiry,test
+298,167,Product/Stock Inquiry,training
+300,95,Delivery Issue,training
+301,97,Delivery Issue,training
+305,4,Payment Issue,training
+308,182,Product/Stock Inquiry,training
+309,243,Order Status Inquiry,training
+311,110,Delivery Issue,test
+312,412,General Inquiry,training
+314,280,Account/Login Issue,training
+315,116,Refund/Cancellation,training
+317,304,Account/Login Issue,training
+318,35,Payment Issue,training
+319,174,Product/Stock Inquiry,training
+320,362,Promotion/Discount Inquiry,training
+321,344,Promotion/Discount Inquiry,training
+324,189,Product/Stock Inquiry,training
+325,335,Promotion/Discount Inquiry,test
+327,27,Payment Issue,training
+328,105,Delivery Issue,training
+329,247,Order Status Inquiry,training
+330,241,Order Status Inquiry,test
+332,297,Account/Login Issue,training
+334,264,Order Status Inquiry,training
+335,148,Refund/Cancellation,training
+336,204,Product/Stock Inquiry,training
+338,310,Account/Login Issue,training
+339,19,Payment Issue,training
+341,88,Delivery Issue,training
+342,414,General Inquiry,training
+343,392,General Inquiry,training
+345,23,Payment Issue,training
+346,355,Promotion/Discount Inquiry,training
+347,415,General Inquiry,training
+349,200,Product/Stock Inquiry,training
+351,94,Delivery Issue,training
+353,34,Payment Issue,training
+354,236,Order Status Inquiry,test
+355,33,Payment Issue,training
+356,123,Refund/Cancellation,test
+357,421,General Inquiry,training
+358,222,Order Status Inquiry,training
+360,306,Account/Login Issue,training
+361,24,Payment Issue,training
+363,71,Delivery Issue,training
+364,133,Refund/Cancellation,training
+365,10,Payment Issue,test
+367,59,Delivery Issue,training
+368,129,Refund/Cancellation,training
+369,211,Product/Stock Inquiry,training
+371,260,Order Status Inquiry,training
+372,251,Order Status Inquiry,training
+374,96,Delivery Issue,training
+375,69,Delivery Issue,training
+376,41,Payment Issue,training
+377,303,Account/Login Issue,training
+378,376,Promotion/Discount Inquiry,test
+380,413,General Inquiry,training
+381,210,Product/Stock Inquiry,training
+383,142,Refund/Cancellation,training
+385,314,Account/Login Issue,training
+386,137,Refund/Cancellation,training
+387,326,Account/Login Issue,test
+389,265,Order Status Inquiry,training
+390,289,Account/Login Issue,test
+391,336,Promotion/Discount Inquiry,training
+392,179,Product/Stock Inquiry,test
+394,100,Delivery Issue,training
+395,199,Product/Stock Inquiry,test
+396,367,Promotion/Discount Inquiry,training
+397,57,Delivery Issue,training
+398,224,Order Status Inquiry,training
+399,146,Refund/Cancellation,training
+402,364,Promotion/Discount Inquiry,training
+404,287,Account/Login Issue,training
+405,288,Account/Login Issue,training
+406,334,Promotion/Discount Inquiry,training
+408,12,Payment Issue,test
+411,261,Order Status Inquiry,test
+412,11,Payment Issue,training
+414,245,Order Status Inquiry,training
+416,73,Delivery Issue,training
+417,138,Refund/Cancellation,training
+418,358,Promotion/Discount Inquiry,training
+419,6,Payment Issue,test
+420,9,Payment Issue,training
+422,28,Payment Issue,training
+423,76,Delivery Issue,training
+427,156,Refund/Cancellation,training
+428,313,Account/Login Issue,test
+430,20,Payment Issue,training
+433,361,Promotion/Discount Inquiry,training
+434,359,Promotion/Discount Inquiry,training
+436,293,Account/Login Issue,training
+437,365,Promotion/Discount Inquiry,training
+440,374,Promotion/Discount Inquiry,training
+441,390,General Inquiry,test
+442,170,Product/Stock Inquiry,training
+444,285,Account/Login Issue,training
+447,294,Account/Login Issue,training
+450,32,Payment Issue,training
