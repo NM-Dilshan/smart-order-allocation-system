@@ -22,6 +22,7 @@ export function calculateHaversineDistance(latitude1: number, longitude1: number
 
 export async function findEligibleBranches(tx: Prisma.TransactionClient, items: Item[]): Promise<Branch[]> {
   if (!items.length) return [];
+  // A single branch must have enough stock for every requested item.
   return tx.branch.findMany({
     where: { AND: items.map(({ productId, quantity }) => ({ inventories: { some: { productId, quantity: { gte: quantity } } } })) },
     select: { id: true, name: true, latitude: true, longitude: true },
@@ -37,6 +38,7 @@ export async function calculateBranchWorkload(tx: Prisma.TransactionClient, bran
 }
 
 export function normalizeMetrics(branches: BranchMetrics[]) {
+  // Scale distance and workload against the eligible branches before scoring.
   const maxDistance = branches.reduce((max, branch) => Math.max(max, branch.distanceKm), 0);
   const maxWorkload = branches.reduce((max, branch) => Math.max(max, branch.workload), 0);
   return branches.map((branch) => ({ ...branch,
@@ -50,6 +52,7 @@ export function calculateAllocationScore(normalizedDistance: number, normalizedW
 }
 
 export function selectBestBranch(branches: Allocation[]): Allocation | null {
+  // Prefer the lowest score, with consistent tie-breaks for equal candidates.
   return [...branches].sort((a, b) => a.score - b.score || a.distanceKm - b.distanceKm || a.workload - b.workload || a.branchId - b.branchId)[0] ?? null;
 }
 

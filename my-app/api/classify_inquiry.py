@@ -16,6 +16,7 @@ UNAVAILABLE = "Classification is temporarily unavailable. Please try again."
 logger = logging.getLogger("inquiry-classifier")
 
 
+# Reuse the fitted model for subsequent requests in this process.
 @lru_cache(maxsize=1)
 def fitted_model():
     from ai.predict import load_model
@@ -51,6 +52,7 @@ def process_request(method, raw, authorization, local=False):
         if not isinstance(message, str) or not message.strip():
             raise ValueError()
         message = message.strip()
+        # Match the Node server's message limit using UTF-16 code units.
         if len(message.encode("utf-16-le")) // 2 > 2000:
             raise ValueError()
     except (ValueError, UnicodeError):

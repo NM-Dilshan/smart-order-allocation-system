@@ -34,6 +34,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     case "checkout-cart":
       return { ...state, buyNow: null, revision: state.revision + 1 };
     case "buy-now":
+      // Keep the regular cart intact while checking out a single product.
       return { ...state, buyNow: [{ productId: action.productId, quantity: 1 }], revision: state.revision + 1 };
     case "complete": {
       // Remove the submitted quantities, preserving any later additions.

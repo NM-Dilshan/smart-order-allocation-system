@@ -5,6 +5,7 @@ const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+// Reuse the database client across development reloads to avoid extra connections.
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({

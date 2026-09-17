@@ -24,6 +24,7 @@ export function validateOrder(body: unknown) {
 
 export function validateOrderItems(items: unknown) {
   if (!Array.isArray(items) || !items.length) return { error: "At least one order item is required." } as const;
+  // Reject duplicate products so each stock check covers the full requested quantity.
   const seen = new Set<number>();
   const validated: { productId: number; quantity: number }[] = [];
   for (const item of items) {
@@ -39,6 +40,7 @@ export function validateOrderItems(items: unknown) {
 }
 
 export function orderError(error: unknown) {
+  // Treat stock races and transaction conflicts as a recoverable allocation failure.
   if (error instanceof StockConflictError || (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034")) {
     return NextResponse.json({ error: "Stock changed and the selected branch can no longer fulfill this order." }, { status: 409 });
   }

@@ -35,11 +35,13 @@ export async function getCurrentUser() {
   const session = await getSession();
   if (!Number.isInteger(session.userId)) return null;
   const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, name: true, email: true, password: true, role: true } });
+  // Reject stale sessions when the account's password has changed.
   if (!user || !user.password.startsWith("scrypt$") || credentialVersion(user.password) !== session.credentialVersion) return null;
   return { id: user.id, name: user.name, email: user.email, role: user.role, management: isManagementUser(user) };
 }
 
 export function validOrigin(request: Request) {
+  // Require the configured origin to protect requests that change data.
   const origin = process.env.AUTH_ORIGIN;
   return !!origin && request.headers.get("origin") === origin;
 }

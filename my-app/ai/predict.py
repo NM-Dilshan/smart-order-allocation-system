@@ -27,6 +27,7 @@ def predict_message(message: str, model: Pipeline | None = None) -> dict:
     text = message.strip()
     category = model.predict([text])[0]
     probabilities = model.predict_proba([text])[0]
+    # Use the predicted category's probability as its confidence score.
     class_index = list(model.classes_).index(category)
     return {"category": str(category), "confidence": float(probabilities[class_index])}
 

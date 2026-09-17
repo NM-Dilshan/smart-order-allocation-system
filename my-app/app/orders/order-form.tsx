@@ -27,6 +27,7 @@ export default function OrderForm({ onClose, onComplete, checkoutItems, selectio
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
   const [availability, setAvailability] = useState<(Availability & { signature: string }) | null>(null);
+  // An availability preview applies only to the location and items it checked.
   const signature = JSON.stringify({ location, items: rows.map(({ productId, quantity }) => ({ productId, quantity })), selectionVersion });
   const available = availability?.signature === signature && availability.available && !!availability.bestAvailableBranch;
   const [locating, setLocating] = useState(false);
@@ -88,6 +89,7 @@ export default function OrderForm({ onClose, onComplete, checkoutItems, selectio
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // The ref blocks repeat submissions before React updates the disabled button.
     if (pending.current || locationPending.current || loading || catalogError) return;
     const validation: Record<string, string> = {};
     for (const [field, limit] of [["latitude", 90], ["longitude", 180]] as const) {

@@ -16,6 +16,7 @@ export async function login(req: Request, audience: "customer" | "management") {
   try {
     const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     const verified = await verifyPassword(password, user?.password ?? "");
+    // Credentials must also belong to the requested customer or management audience.
     if (!user || !verified || !(audience === "management" ? isManagementUser(user) : isCustomerUser(user))) return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
     const session = await getSession();
     session.userId = user.id; session.credentialVersion = credentialVersion(user.password);

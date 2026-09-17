@@ -18,6 +18,7 @@ export function parsePrediction(output: string): Prediction {
   } catch { throw new ClassifierUnavailableError("malformed-json"); }
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new ClassifierUnavailableError("invalid-prediction");
   const { category, confidence } = value as Record<string, unknown>;
+  // Accept only known categories and a finite probability between zero and one.
   if (typeof category !== "string" || !(INQUIRY_CATEGORIES as readonly string[]).includes(category) ||
       typeof confidence !== "number" || !Number.isFinite(confidence) || confidence < 0 || confidence > 1) throw new ClassifierUnavailableError("invalid-prediction");
   return { category: category as Prediction["category"], confidence };
@@ -61,6 +62,7 @@ export async function classifyInquiry(value: string): Promise<Prediction> {
       name === "TimeoutError" || name === "AbortError" ? "timeout" :
       phase === "configuration" ? "configuration" : "network-error";
     console.error("[inquiry-classifier] Classification failed", { phase, reason });
+    // Keep diagnostic details in server logs and return a consistent public error.
     throw new ClassifierUnavailableError();
   }
 }

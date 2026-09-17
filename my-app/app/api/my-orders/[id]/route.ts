@@ -7,6 +7,7 @@ import { parseOrderId } from "@/lib/orders";
 async function GETHandler(user: CurrentUser, _req: Request, context: { params: Promise<{ id: string }> }) {
   const id = parseOrderId((await context.params).id);
   if (id === null) return NextResponse.json({ error: "Invalid order ID." }, { status: 400 });
+  // Scope the lookup to the signed-in customer to protect other customers' orders.
   const order = await prisma.order.findFirst({ where: { id, userId: user.id }, select: customerOrderSelect });
   if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 });
   return NextResponse.json(order, { headers: { "Cache-Control": "no-store" } });

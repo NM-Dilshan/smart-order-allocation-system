@@ -19,6 +19,7 @@ async function POSTHandler(customer: CurrentUser, req: Request) {
   const result = validateOrder(body);
   if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
   try {
+    // Commit the stock deduction and new order together, or roll back both.
     const order = await prisma.$transaction(async (tx) => {
       const { items, customerLatitude, customerLongitude } = result.data;
       const products = await tx.product.findMany({ where: { id: { in: items.map((item) => item.productId) } }, select: { id: true } });

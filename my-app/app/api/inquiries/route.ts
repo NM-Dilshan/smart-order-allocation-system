@@ -13,6 +13,7 @@ async function POSTHandler(user: CurrentUser, req: Request) {
   const message = validateInquiryMessage(body && typeof body === "object" && !Array.isArray(body) ? (body as Record<string, unknown>).message : null);
   if (!message) return NextResponse.json({ error: `Enter a message between 1 and ${MAX_INQUIRY_LENGTH} characters.` }, { status: 400 });
   let prediction;
+  // Save the inquiry only after classification succeeds.
   try { prediction = await classifyInquiry(message); }
   catch { return NextResponse.json({ error: "Classification is temporarily unavailable. Please try again." }, { status: 503 }); }
   try {
